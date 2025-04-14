@@ -1,10 +1,11 @@
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
-import studentsRouter from './routers/students.js';
+import router from './routers/index.js';
 import { getEnvVar } from './utils/getEnvVar.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import cookieParser from 'cookie-parser';
 
 // Читаємо змінну оточення PORT
 const PORT = Number(getEnvVar('PORT', '3000'));
@@ -22,6 +23,8 @@ export const startServer = () => {
     }),
   );
   app.use(cors());
+  //Для роботи із куками
+  app.use(cookieParser());
 
   app.use(
     pino({
@@ -47,8 +50,8 @@ export const startServer = () => {
     });
   });
 
-  //Маршрут для студентів
-  app.use(studentsRouter);
+  //Кореневий маршрут для студентів та для користувачів
+  app.use(router);
 
   //middleware обробки випадку, коли клієнт звертається до неіснуючого маршруту
   app.use('*', notFoundHandler);

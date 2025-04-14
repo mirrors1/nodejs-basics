@@ -16,46 +16,57 @@ import {
   updateStudentSchema,
 } from '../validation/students.js';
 import { isValidId } from '../middlewares/isValidId.js';
+import { authenticate } from '../middlewares/authenticate.js';
+import { checkRoles } from '../middlewares/checkRoles.js';
+import { ROLES } from '../constants/index.js';
 
 const router = Router();
 
+//Перевіряє аутентифікацію кориристувача для використання маршрутів, що нижче
+router.use(authenticate);
+
 //Маршрут для отримання колекції всіх студентів
-router.get('/students', ctrlWrapper(getStudentsController));
+router.get('/', checkRoles(ROLES.TEACHER), ctrlWrapper(getStudentsController));
 
 //Маршрут для отримання студента за його id
 router.get(
-  '/students/:studentId',
+  '/:studentId',
   isValidId,
+  checkRoles(ROLES.TEACHER, ROLES.PARENT),
   ctrlWrapper(getStudentByIdController),
 );
 
 //Маршрут для додавання студента
 router.post(
-  '/students',
+  '/',
+  checkRoles(ROLES.TEACHER),
   validateBody(createStudentSchema),
   ctrlWrapper(createStudentController),
 );
 
 //Маршрут для видалення студента
 router.delete(
-  '/students/:studentId',
+  '/:studentId',
   isValidId,
+  checkRoles(ROLES.TEACHER),
   ctrlWrapper(deleteStudentController),
 );
 
 //Маршрут для оновлення студента (існуючий запис), або його додаваня, якщо він не існує
 router.put(
-  '/students/:studentId',
-  validateBody(createStudentSchema),
+  '/:studentId',
   isValidId,
+  checkRoles(ROLES.TEACHER),
+  validateBody(createStudentSchema),
   ctrlWrapper(upsertStudentController),
 );
 
 //Маршрут для оновлення одного поля у студента
 router.patch(
-  `/students/:studentId`,
-  validateBody(updateStudentSchema),
+  `/:studentId`,
   isValidId,
+  checkRoles(ROLES.TEACHER, ROLES.PARENT),
+  validateBody(updateStudentSchema),
   ctrlWrapper(patchStudentController),
 );
 
