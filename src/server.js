@@ -1,11 +1,13 @@
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+
 import router from './routers/index.js';
 import { getEnvVar } from './utils/getEnvVar.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
-import cookieParser from 'cookie-parser';
+import { UPLOAD_DIR } from './constants/index.js';
 
 // Читаємо змінну оточення PORT
 const PORT = Number(getEnvVar('PORT', '3000'));
@@ -52,6 +54,9 @@ export const startServer = () => {
 
   //Кореневий маршрут для студентів та для користувачів
   app.use(router);
+
+  //Маршрут для роботи з статичними файлами
+  app.use('/uploads', express.static(UPLOAD_DIR));
 
   //middleware обробки випадку, коли клієнт звертається до неіснуючого маршруту
   app.use('*', notFoundHandler);
